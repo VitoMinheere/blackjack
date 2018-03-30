@@ -92,6 +92,17 @@ class TestGameFunctions(unittest.TestCase):
         players = get_players_with_money([self.player, self.player2])
         self.assertEqual(0, len(players))
 
+    def test_print_winner(self):
+        win_statement = print_winner(self.player)
+        self.assertEqual("r!", win_statement[-2:])
+
+        win_statement = print_winner([self.player, self.player2])
+        self.assertEqual("s!", win_statement[-2:])  # Check last 2 characters to check if there are multiple winners
+
+    def test_split_hand_duplicate_cards(self):
+        self.player.hand = self.matching_hand
+        print(self.player.split_hand_when_duplicate_cards())
+
 
 class TestDeckFunctions(unittest.TestCase):
 
