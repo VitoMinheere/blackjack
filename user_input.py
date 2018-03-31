@@ -57,3 +57,16 @@ def ask_for_amount_of_players():
                 print("Please enter a number higher then 0")
         except ValueError:
             print('Please enter a number')
+
+
+def ask_player_for_name():
+    while True:
+        try:
+            player_name = input("What is your name?")
+            if len(player_name) > 2:
+                break
+            else:
+                print("Please enter a longer name")
+        except ValueError:
+            pass
+    return player_name
