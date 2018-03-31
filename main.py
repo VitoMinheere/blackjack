@@ -1,48 +1,34 @@
 from random import shuffle
 from classes import Player, Deck
+from user_input import *
+from game_logic import *
 
 deck = Deck()
 amount_on_table = 0
 
 
-def get_players_with_money(players):
-    print(players)
-    players_with_money = []
-    for player in players:
-        if player.get_money_amount() > 0:
-            print(player.name + " has " + str(player.get_money_amount()) + " left")
-            players_with_money.append(player)
-        else:
-            print(player.name + " has no money left")
-
-    return players_with_money
-
-
-def check_players_status(players):
-    still_playing = []
-    for player in players:
-        status = player.get_status()
-        if status:
-            still_playing.append(player)
-
-    if len(still_playing) > 0:
-        return True
-    else:
-        return False
-
-
-def place_bet(player):
-    while True:
-        try:
-            player_bet = int(input("You have " + str(player.get_money_amount()) + ". How much would you like to bet?"))
-            if player_bet <= player.get_money_amount():
-                break
-            else:
-                print("You can only bet up to " + str(player.get_money_amount()))
-        except ValueError:
-            print('Please enter a number')
-    player.set_money(player.get_money_amount()-player_bet)
+def place_bet_and_remove_money_from_player(player):
+    player_bet = ask_player_what_amount_to_bet(player)
+    player.set_money(player.get_money_amount() - player_bet)
     return player_bet
+
+
+def bank_is_bust(players):
+    global amount_on_table
+    split = int(amount_on_table / len(players))
+    print("Bank has bust. Everybody gets " + str(split))
+    for player in players:
+        player.set_money(player.get_money_amount() + split)
+
+
+def print_winner(winner):
+    if type(winner) is not list:
+        winner = [winner]
+
+    if len(winner) == 1:
+        return str(winner) + " is the winner!"
+    elif len(winner) > 1:
+        return str(winner) + " are the winners!"
 
 
 def run_bank_logic(bank):
@@ -59,74 +45,46 @@ def run_bank_logic(bank):
     return action
 
 
-def bank_is_bust(players):
-    global amount_on_table
-    split = int(amount_on_table / len(players))
-    print("Bank has bust. Everybody gets " + str(split))
-    for player in players:
-        player.set_money(player.get_money_amount()+split)
-
-
 def choose_next_action(player):
     global deck
-    matching_cards = False
-    question = "What would you like to do? [H]it or [S]tand"
-    if player.check_hand_for_matching_cards():
-        question = "You have two of the same cards, you can split your hand in 2 separate hands. " \
-                   + question + " or [SP]lit"
-        matching_cards = True
-    try:
-        action = (input(question).upper())
-        if action == 'H':
-            player.hit(deck)
-            if player.get_hand_value() < 21:
-                print(str(player.get_name()) + ", you have " + str(player.get_card_names())
-                      + " which amounts to a value of " + str(player.get_hand_value()) + "\n")
-            else:
-                print('Hand value is ' + str(player.get_hand_value()) + '. You are bust!')
-        elif action == 'S':
-            pass
-        elif action == 'SP' and matching_cards:
-            player_extra_hand = player.split_hand_when_duplicate_cards()
-            return player_extra_hand
-    except ValueError:
-        if matching_cards:
-            print("Please enter H, S or SP")
+    player_chosen_action = ask_player_for_next_action(player)
+
+    if player_chosen_action == 'H':
+        player.hit(deck)
+        if player.get_hand_value() < 21:
+            print(str(player.get_name()) + ", you have " + str(player.get_card_names())
+                  + " which amounts to a value of " + str(player.get_hand_value()) + "\n")
         else:
-            print("Please enter H or S")
+            print('Hand value is ' + str(player.get_hand_value()) + '. You are bust!')
 
-
-def print_winner(winner):
-    if type(winner) is not list:
-        winner = [winner]
-
-    if len(winner) == 1:
-        return str(winner) + " is the winner!"
-    elif len(winner) > 1:
-        return str(winner) + " are the winners!"
+    elif player_chosen_action == 'S':
+        pass
+    elif player_chosen_action == 'SP':
+        player_extra_hand = player.split_hand_when_duplicate_cards()
+        return player_extra_hand
 
 
 def check_who_wins(bank, bank_value, players, highest_hand):
     winner = []
     if highest_hand == bank_value:
         winner = bank.get_name()
-        bank.set_money(bank.get_money_amount()+amount_on_table)
+        bank.set_money(bank.get_money_amount() + amount_on_table)
     elif highest_hand < bank_value:
         winner = bank.get_name()
-        bank.set_money(bank.get_money_amount()+amount_on_table)
+        bank.set_money(bank.get_money_amount() + amount_on_table)
     elif highest_hand > bank_value:
 
         if len(players) > 1:
             part = amount_on_table / len(players)
             for player in players:
-                player.set_money(player.get_money_amount()+part)
+                player.set_money(player.get_money_amount() + part)
                 winner.append(player.get_name())
                 print_winner(winner)
         elif len(players) == 1:
             for player in players:
                 winner = player.get_name()
                 print_winner([winner])
-                player.set_money(player.get_money_amount()+amount_on_table)
+                player.set_money(player.get_money_amount() + amount_on_table)
 
     return winner
 
@@ -188,7 +146,7 @@ def first_betting_round(players, bank):
     for player in players:
         print(str(player.get_name()) + ", you have " + str(player.get_card_names())
               + " which amounts to a value of " + str(player.get_hand_value()) + "\n")
-        player_bet = place_bet(player)
+        player_bet = place_bet_and_remove_money_from_player(player)
         amount_on_table += player_bet
         print(str(player.name) + ", you have " + str(player.get_money_amount()) + " left" + "\n")
         print("Amount on the table is " + str(amount_on_table))
@@ -208,31 +166,16 @@ def start_round(players, bank):
 def play_another_round(players, bank):
     players_for_next_round = get_players_with_money(players)
     if len(players_for_next_round) > 0:
-        while True:
-            try:
-                answer = input("Would you like to play another round? [Y]es or [N]o ?").upper()
-                if answer == "Y":
-                    start_round(players_for_next_round, bank)
-                elif answer == "N":
-                    break
-            except ValueError:
-                print("Please enter Y or N")
-
+        player_answer = ask_player_for_another_round()
+        if player_answer == 'Y':
+            start_round(players_for_next_round, bank)
     else:
         print("No players left. Game has ended")
 
 
 def set_up_game():
     players = []
-    while True:
-        try:
-            amount_of_players = int(input("How many players would you like on the table?"))
-            if amount_of_players >= 1:
-                break
-            else:
-                print("Please enter a number higher then 0")
-        except ValueError:
-            print('Please enter a number')
+    amount_of_players = ask_for_amount_of_players()
 
     for x in range(0, amount_of_players):
         # player_name = input('Enter your name')
@@ -241,7 +184,7 @@ def set_up_game():
 
     global deck
     if amount_of_players > 3:
-        amount_of_decks = int(amount_of_players / 3)
+        amount_of_decks = int(amount_of_players / 3)  # max 3 players per deck
         deck = Deck(amount_of_decks)
 
     bank = Player('bank')

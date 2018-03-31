@@ -27,21 +27,21 @@ class TestGameFunctions(unittest.TestCase):
         self.assertEqual(len(self.player.hand), 0)
         self.assertGreater(self.player.money, 0)
 
-    def test_asses_cards(self):
+    def test_asses_cards_in_hand(self):
         self.player.hand = self.bust_hand
         self.assertFalse(self.player.assess_hand_value())
 
         self.player.hand = self.blackjack_hand
         self.assertTrue(self.player.assess_hand_value())
 
-    def test_matching_cards(self):
+    def test_check_matching_cards_in_hand(self):
         self.player.hand = self.matching_hand
         self.assertTrue(self.player.check_hand_for_matching_cards())
 
         self.player.hand = self.non_matching_hand
         self.assertFalse(self.player.check_hand_for_matching_cards())
 
-    def test_check_for_ace(self):
+    def test_check_for_ace_in_hand(self):
         self.player.hand = self.ace_hand
         self.assertTrue(self.player.check_hand_for_aces())
 
@@ -61,7 +61,7 @@ class TestGameFunctions(unittest.TestCase):
                                 [self.player], self.player.get_hand_value())
         self.assertEqual(self.bank.name, winner)
 
-    def test_bank_wins_same_hand(self):
+    def test_bank_wins_with_same_score(self):
         self.bank.hand = self.winning_hand
         self.player.hand = self.winning_hand
         winner = check_who_wins(self.bank, self.bank.get_hand_value(),
@@ -78,6 +78,7 @@ class TestGameFunctions(unittest.TestCase):
     def test_players_win_with_same_hand(self):
         self.player.hand = self.winning_hand
         self.player2.hand = self.winning_hand
+        self.bank.hand = self.losing_hand
         winner = check_who_wins(self.bank, self.bank.get_hand_value(),
                                 [self.player, self.player2], self.player.get_hand_value())
         self.assertEqual(2, len(winner))
