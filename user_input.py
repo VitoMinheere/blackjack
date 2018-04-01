@@ -1,5 +1,3 @@
-
-
 def ask_player_what_amount_to_bet(player):
     while True:
         try:
@@ -16,23 +14,28 @@ def ask_player_what_amount_to_bet(player):
 def ask_player_for_next_action(player):
     matching_cards = False
     question = "What would you like to do? [H]it or [S]tand"
-    if player.check_hand_for_matching_cards():
+    if player.hand.check_hand_for_matching_cards():
         question = "You have two of the same cards, you can split your hand in 2 separate hands. " \
                    + question + " or [SP]lit"
         matching_cards = True
-    try:
-        action = (input(question).upper())
-        if action == 'H':
-            return action
-        elif action == 'S':
-            return action
-        elif action == 'SP' and matching_cards:
-            return action
-    except ValueError:
-        if matching_cards:
-            print("Please enter H, S or SP")
-        else:
-            print("Please enter H or S")
+    while True:
+        try:
+            action = (input(question).upper())
+            if action == 'H':
+                return action
+            elif action == 'S':
+                return action
+            elif action == 'SP' and matching_cards:
+                return action
+            elif matching_cards:
+                print("Please enter H, S or SP")
+            else:
+                print("Please enter H or S")
+        except ValueError:
+            if matching_cards:
+                print("Please enter H, S or SP")
+            else:
+                print("Please enter H or S")
 
 
 def ask_player_for_another_round():
@@ -70,3 +73,18 @@ def ask_player_for_name():
         except ValueError:
             pass
     return player_name
+
+
+def ask_player_to_change_ace():
+    while True:
+        try:
+            answer = input(
+                "You have an ace! The value is 11 but you can change it to 1. Do you want to change the value to 1? [Y]es of [N]o")
+            if answer == "Y":
+                return True
+            elif answer == "N":
+                return False
+            else:
+                print("Please enter Y or N")
+        except ValueError:
+            print("Please enter Y or N")

@@ -3,6 +3,11 @@ def print_hand_value_for_player(player, card_names, hand_value):
           + " which amounts to a value of " + str(hand_value) + "\n")
 
 
+def print_extra_hand_value_for_player(player, card_names, hand_value):
+    print(str(player) + ", your extra hand has " + str(card_names)
+          + " which amounts to a value of " + str(hand_value) + "\n")
+
+
 def print_player_hand_value(player, hand_value):
     print(str(player) + " has a hand of " + str(hand_value) + "\n")
 
@@ -20,11 +25,11 @@ def print_bank_has_bust(split):
 
 
 def print_winner(winner):
-    return str(winner) + " is the winner!"
+    print(str(winner) + " is the winner!")
 
 
 def print_multiple_winners(winners):
-    return str(winners) + " are the winners!"
+    print(str(winners) + " are the winners!")
 
 
 def print_amount_money_player_has(player, amount):

@@ -1,11 +1,9 @@
-from main import *
+import main
 from print_statements import *
 from user_input import *
 
-import main as main
 
-
-def check_players_status(players):
+def check_not_bust_players(players):
     still_playing = []
     for player in players:
         status = player.get_status()
@@ -23,18 +21,11 @@ def place_bet_and_remove_money_from_player(player):
     return player_bet
 
 
-def bank_is_bust(players):
-    split = int(main.amount_on_table / len(players))
-    print_bank_has_bust(split)
-    for player in players:
-        player.set_money(player.get_money_amount() + split)
-
-
 def run_bank_logic(bank):
-    hand_value = bank.get_hand_value()
+    hand_value = bank.hand.get_hand_value()
     action = ""
     if hand_value <= 16:
-        bank.hit(main.deck)
+        bank.hand.add_card_to_hand(main.deck.deal_card())
         action = "hit"
     elif hand_value >= 17:
         action = "stay"
@@ -47,66 +38,79 @@ def choose_next_action(player, extra_hand=False):
     player_chosen_action = ask_player_for_next_action(player)
 
     if player_chosen_action == 'H' and extra_hand is False:
-        player.hit(main.deck)
-        if player.assess_hand_value():
-            print_hand_value_for_player(player.get_name(), player.get_card_names(), player.get_hand_value())
+        player.hand.add_card_to_hand(main.deck.deal_card())
+        if player.hand.check_if_hand_is_not_bust():
+            print_hand_value_for_player(player.get_name(), player.hand.get_card_names(),
+                                        player.hand.get_hand_value())
         else:
-            print_player_is_bust(player.get_hand_value())
+            print_player_is_bust(player.hand.get_hand_value())
 
     elif player_chosen_action == 'H' and extra_hand is True:
-        player.hit_extra_hand(main.deck)
-        if player.assess_extra_hand_value():
-            print_hand_value_for_player(player.get_name(), player.get_extra_hand_card_names(),
-                                        player.get_extra_hand_value())
+        player.extra_hand.add_card_to_hand(main.deck.deal_card())
+        if player.extra_hand.check_if_hand_is_not_bust():
+            print_extra_hand_value_for_player(player.get_name(), player.extra_hand.get_card_names(),
+                                        player.extra_hand.get_hand_value())
         else:
-            print_player_is_bust(player.get_extra_hand_value())
+            print_player_is_bust(player.extra_hand.get_hand_value())
 
     elif player_chosen_action == 'S':
         pass
     elif player_chosen_action == 'SP':
-        player.split_hand_when_duplicate_cards()
+        player.hand, player.extra_hand = player.split_hand_when_duplicate_cards()
 
 
-def payout_money_on_table(players):
-
+def payout_money_on_table(players, amount_on_table):
+    print_amount_money_on_table(amount_on_table)
     if len(players) > 1:
         winners = []
-        if main.amount_on_table > 0:
-            part = main.amount_on_table / len(players)
+        if amount_on_table > 0:
+            part = (amount_on_table / len(players))
+            print('Multiple winners, part = ' + str(part))
         else:
             part = 0
         for player in players:
             player.set_money(player.get_money_amount() + part)
             winners.append(player.get_name())
-            print_multiple_winners(winners)
         return winners
 
     elif len(players) == 1:
         for player in players:
-            print_winner(player.get_name())
-            player.set_money(player.get_money_amount() + main.amount_on_table)
+            player.set_money(player.get_money_amount() + amount_on_table)
             return player.get_name()
 
 
-def check_who_wins(bank, bank_value, players, highest_hand):
+def check_who_wins(bank, bank_value, players, highest_hand, amount_on_table):
     if highest_hand == bank_value or highest_hand < bank_value:
-        print_winner(bank.get_name())
-        bank.set_money(bank.get_money_amount() + main.amount_on_table)
+        bank.set_money(bank.get_money_amount() + amount_on_table)
         return bank.get_name()
 
     elif highest_hand > bank_value:
-        return payout_money_on_table(players)
+        return payout_money_on_table(players, amount_on_table)
 
 
-def check_bank_cards(bank):
-    bank_value = bank.get_hand_value()
+def check_bank_is_not_bust(bank):
+    bank_value = bank.hand.get_hand_value()
     print_player_hand_value(bank.get_name(), bank_value)
     if bank_value > 21:
         return False
     return True
 
 
-def get_highest_card_on_table(players, bank):
+def check_for_bust(players, bank, amount_on_table):
+    if check_not_bust_players(players):
+        if check_bank_is_not_bust(bank):
+            return True
+        else:
+            print_bank_has_bust(amount_on_table/len(players))
+            payout_money_on_table(players, amount_on_table)
+            return False
+    else:
+        print_all_players_are_bust()
+        bank.set_money(bank.get_money_amount() + amount_on_table)
+        return False
+
+
+def get_highest_hand_on_table(players):
     highest_hand = 0
     highest_hand_holding_players = []
 
@@ -122,33 +126,43 @@ def get_highest_card_on_table(players, bank):
                 highest_hand = hand_value
                 highest_hand_holding_players = [player]
 
-    if check_players_status(players):
-        if check_bank_cards(bank):
-            check_who_wins(bank, bank.get_hand_value(), highest_hand_holding_players, highest_hand)
-        else:
-            bank_is_bust(players)
-    else:
-        print_all_players_are_bust()
-        bank.set_money(bank.get_money_amount() + main.amount_on_table)
-    players = get_players_with_money(players)
-    play_another_round(players, bank)
+    return highest_hand_holding_players, highest_hand
 
 
-def deal_card_and_let_player_choose_action(player, extra_hand=False):
-    player.add_card_to_hand(main.deck.deal_card())
+def deal_card_for_extra_hand(player):
+    if player.extra_hand.get_amount_of_cards() <= 2:
+        player.extra_hand.add_card_to_hand(main.deck.deal_card())
+        if player.extra_hand.has_ace():
+            if ask_player_to_change_ace():
+                ace_card = player.extra_hand.get_ace_card()
+                ace_card.set_card_value(1)
 
-    if player.assess_hand_value() and extra_hand is False:
-        print_hand_value_for_player(player.get_name(), player.get_card_names(), player.get_hand_value())
+    if player.hand.check_if_hand_is_not_bust() and player.extra_hand.check_if_hand_is_not_bust():
+        print_hand_value_for_player(player.get_name(), player.extra_hand.get_card_names(),
+                                    player.extra_hand.get_hand_value())
+        choose_next_action(player, True)  # action for extra hand
+
+        print_hand_value_for_player(player.get_name(), player.hand.get_card_names(),
+                                    player.hand.get_hand_value())
+        choose_next_action(player)  # action for normal hand
+
+
+def deal_card_and_let_player_choose_action(player):
+    if player.has_extra_hand():
+        deal_card_for_extra_hand(player)
+
+    if player.hand.get_amount_of_cards() <= 2:
+        player.hand.add_card_to_hand(main.deck.deal_card())
+        if player.hand.has_ace():
+            if ask_player_to_change_ace():
+                ace_card = player.hand.get_ace_card()
+                ace_card.set_card_value(1)
+
+    if player.hand.check_if_hand_is_not_bust():
+        print_hand_value_for_player(player.get_name(), player.hand.get_card_names(), player.hand.get_hand_value())
         choose_next_action(player)
 
-        if player.check_for_extra_hand() and extra_hand is False:  # Check for extra hand and give player extra turn
-            deal_card_and_let_player_choose_action(player, True)
-
-    elif player.assess_extra_hand_value() and extra_hand is True:
-        print_hand_value_for_player(player.get_name(), player.get_extra_hand_card_names(), player.assess_extra_hand_value())
-        choose_next_action(player)
-
-    elif player.assess_hand_value() is False:
-        print_player_is_bust(player.get_hand_value())
-    elif player.assess_extra_hand_value() is False:
-        print_player_is_bust(player.get_extra_hand_value())
+    elif player.hand.check_if_hand_is_not_bust() is False:
+        print_player_is_bust(player.hand.get_hand_value())
+    elif player.extra_hand.check_if_hand_is_not_bust() is False:
+        print_player_is_bust(player.extra_hand.get_hand_value())
