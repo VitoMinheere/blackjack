@@ -6,7 +6,7 @@ class Deck:
         self.cards = []
         for card in blackjack_cards:
             self.cards.append(Card(card['name'], card['value']))
-        self.cards *= (4 * amount)
+        self.cards *= amount
 
     def deal_card(self):
         return self.cards.pop()
