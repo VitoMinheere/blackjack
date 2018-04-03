@@ -102,7 +102,6 @@ class TestDeckFunctions(unittest.TestCase):
 
     def test_deck_is_complete(self):
         test_deck = Deck()
-        print(deck)
         self.assertEqual(len(test_deck.cards), 56)
 
     def test_draw_card(self):
@@ -132,6 +131,50 @@ class TestCardFunctions(unittest.TestCase):
     def test_card_is_ace(self):
         self.assertTrue(self.ace.is_ace())
         self.assertFalse(self.card.is_ace())
+
+
+class TestHandFunctions(unittest.TestCase):
+
+    def setUp(self):
+        self.one_card_hand = Hand([Card('7', 7)])
+        self.matching_hand = Hand([Card('7', 7), Card('7', 7)])
+        self.non_matching_hand = Hand([Card('6', 6), Card('7', 7)])
+        self.bust_hand = Hand([Card('7', 7), Card('7', 7), Card('8', 8)])
+        self.ace_hand = Hand([Card('Ace', 11), Card('7', 7)])
+
+    def test_get_hand_value(self):
+        self.assertEqual(14, self.matching_hand.get_hand_value())
+
+    def test_get_amount_of_cards(self):
+        self.assertEqual(2, self.matching_hand.get_amount_of_cards())
+
+    def test_get_card_names(self):
+        self.assertEqual(['7', '7'], self.matching_hand.get_card_names())
+
+    def test_add_Card_to_hand(self):
+        self.card = Card('7', 7)
+        self.one_card_hand.add_card_to_hand(self.card)
+        self.assertEqual(2, self.one_card_hand.get_amount_of_cards())
+
+    def test_check_if_hand_not_bust(self):
+        self.assertTrue(self.matching_hand.check_if_hand_is_not_bust())
+        self.assertFalse(self.bust_hand.check_if_hand_is_not_bust())
+
+    def test_hand_for_duplicate_cards(self):
+        self.assertTrue(self.matching_hand.check_hand_for_matching_cards())
+        self.assertFalse(self.non_matching_hand.check_hand_for_matching_cards())
+
+    def test_hand_has_ace(self):
+        self.assertTrue(self.ace_hand.has_ace())
+        self.assertFalse(self.matching_hand.has_ace())
+
+    def test_get_ace_card(self):
+        ace_card = self.ace_hand.get_ace_card()
+        self.assertTrue(ace_card.is_ace())
+
+    def test_empty_hand(self):
+        self.matching_hand.empty_hand()
+        self.assertEqual(0, self.matching_hand.get_amount_of_cards())
 
 
 if __name__ == '__main__':

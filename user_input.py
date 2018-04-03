@@ -2,8 +2,10 @@ def ask_player_what_amount_to_bet(player):
     while True:
         try:
             player_bet = int(input("You have " + str(player.get_money_amount()) + ". How much would you like to bet?"))
-            if player_bet <= player.get_money_amount():
+            if player_bet <= player.get_money_amount() and player_bet > 0:
                 break
+            elif player_bet == 0:
+                print("You must be more than 0")
             else:
                 print("You can only bet up to " + str(player.get_money_amount()))
         except ValueError:
@@ -79,7 +81,7 @@ def ask_player_to_change_ace():
     while True:
         try:
             answer = input(
-                "You have an ace! The value is 11 but you can change it to 1. Do you want to change the value to 1? [Y]es of [N]o")
+                "You have an ace! The value is 11 but you can change it to 1. Do you want to change the value to 1? [Y]es of [N]o").upper()
             if answer == "Y":
                 return True
             elif answer == "N":

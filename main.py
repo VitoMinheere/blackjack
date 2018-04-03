@@ -31,7 +31,7 @@ def play_next_round(players, bank):
     game_logic.run_bank_logic(bank)
     highest_hand_players, highest_hand_value = game_logic.get_highest_hand_on_table(players)
 
-    if game_logic.check_for_bust(highest_hand_players, bank, amount_on_table):
+    if game_logic.check_for_bust(players, bank, amount_on_table):
         winner = game_logic.check_who_wins(bank, bank.hand.get_hand_value(),
                                            highest_hand_players, highest_hand_value, amount_on_table)
         if isinstance(winner, list):

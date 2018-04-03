@@ -56,7 +56,8 @@ def choose_next_action(player, extra_hand=False):
     elif player_chosen_action == 'S':
         pass
     elif player_chosen_action == 'SP':
-        player.hand, player.extra_hand = player.split_hand_when_duplicate_cards()
+        player.hand, player.extra_hand = player.hand.split_hand_when_duplicate_cards()
+        deal_card_and_let_player_choose_action(player)
 
 
 def payout_money_on_table(players, amount_on_table):
@@ -101,7 +102,7 @@ def check_for_bust(players, bank, amount_on_table):
         if check_bank_is_not_bust(bank):
             return True
         else:
-            print_bank_has_bust(amount_on_table/len(players))
+            print_bank_has_bust(amount_on_table/(len(players)))
             payout_money_on_table(players, amount_on_table)
             return False
     else:
@@ -115,7 +116,7 @@ def get_highest_hand_on_table(players):
     highest_hand_holding_players = []
 
     for player in players:
-        if player.get_status():
+        if player.hand.check_if_hand_is_not_bust() and player.extra_hand.check_if_hand_is_not_bust():
             hand_value = player.get_highest_hand_value()
             print_player_hand_value(player.get_name(), hand_value)
 
