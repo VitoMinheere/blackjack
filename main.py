@@ -34,7 +34,7 @@ def play_next_round(players, bank):
     if game_logic.check_for_bust(players, bank, amount_on_table):
         winner = game_logic.check_who_wins(bank, bank.hand.get_hand_value(),
                                            highest_hand_players, highest_hand_value, amount_on_table)
-        if isinstance(winner, list):
+        if isinstance(winner, list):  # A list will be returned if there are multiple winners
             print_multiple_winners(winner)
         else:
             print_winner(winner)

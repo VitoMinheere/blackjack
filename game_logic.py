@@ -66,7 +66,6 @@ def payout_money_on_table(players, amount_on_table):
         winners = []
         if amount_on_table > 0:
             part = (amount_on_table / len(players))
-            print('Multiple winners, part = ' + str(part))
         else:
             part = 0
         for player in players:
