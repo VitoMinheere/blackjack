@@ -18,8 +18,9 @@ def ask_player_for_next_action(player):
     question = "What would you like to do? [H]it or [S]tand"
     if player.hand.check_hand_for_matching_cards():
         question = "You have two of the same cards, you can split your hand in 2 separate hands. " \
-                   + question + " or [SP]lit" + "\n"
+                   + question + " or [SP]lit"
         matching_cards = True
+    question += "\n"
     while True:
         try:
             action = (input(question).upper())

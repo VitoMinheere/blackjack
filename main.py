@@ -86,7 +86,7 @@ def set_up_game():
     players = []
     amount_of_players = ask_for_amount_of_players()
 
-    for x in range(0, amount_of_players):
+    for _ in range(0, amount_of_players):
         player_name = ask_player_for_name()
         player = Player(player_name)
         players.append(player)
@@ -96,7 +96,7 @@ def set_up_game():
         amount_of_decks = int(amount_of_players / 3)  # max 3 players per deck
         deck = Deck(amount_of_decks)
 
-    bank = Player('bank')
+    bank = Player('The bank')
     start_round(players, bank)
 
 

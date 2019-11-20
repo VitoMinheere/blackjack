@@ -13,7 +13,7 @@ def print_player_hand_value(player, hand_value):
 
 
 def print_player_is_bust(hand_value):
-    print("Hand value is ' + str(hand_value) + '. You are bust!" + "\n")
+    print("Hand value is " + str(hand_value) + ". You are bust!" + "\n")
 
 
 def print_bank_action(action):
