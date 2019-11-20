@@ -4,7 +4,7 @@ from cards import blackjack_cards
 class Deck:
     def __init__(self, amount=1):
         self.cards = []
-        for card in blackjack_cards:
+        for card in (x for _ in range(4) for x in blackjack_cards):
             self.cards.append(Card(card['name'], card['value']))
         self.cards *= amount
 
